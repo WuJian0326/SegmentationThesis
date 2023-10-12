@@ -1,0 +1,15 @@
+2023-10-12 18:36:38,683 [train.py:63] INFO: learning rate : 0.001
+2023-10-12 18:36:38,683 [train.py:64] INFO: batch size : 25
+2023-10-12 18:36:38,683 [train.py:65] INFO: num epoch : 300
+2023-10-12 18:36:38,683 [train.py:66] INFO: trainflow: 10
+2023-10-12 18:36:38,683 [train.py:87] INFO: ==========Start training=========
+2023-10-12 18:36:52,636 [trainer.py:210] INFO: Epoch : 1, Train_loss : nan, Mean_ioU: 0.0396215058863163
+2023-10-12 18:37:00,256 [trainer.py:210] INFO: Epoch : 2, Train_loss : nan, Mean_ioU: 0.03295902535319328
+2023-10-12 18:37:07,960 [trainer.py:210] INFO: Epoch : 3, Train_loss : nan, Mean_ioU: 0.032913148403167725
+2023-10-12 18:37:15,633 [trainer.py:210] INFO: Epoch : 4, Train_loss : nan, Mean_ioU: 0.03295361250638962
+2023-10-12 18:37:23,315 [trainer.py:210] INFO: Epoch : 5, Train_loss : nan, Mean_ioU: 0.03291550651192665
+2023-10-12 18:37:30,990 [trainer.py:210] INFO: Epoch : 6, Train_loss : nan, Mean_ioU: 0.032965037971735
+2023-10-12 18:37:38,791 [trainer.py:210] INFO: Epoch : 7, Train_loss : nan, Mean_ioU: 0.03291283920407295
+2023-10-12 18:37:46,492 [trainer.py:210] INFO: Epoch : 8, Train_loss : nan, Mean_ioU: 0.032948944717645645
+2023-10-12 18:37:54,258 [trainer.py:210] INFO: Epoch : 9, Train_loss : nan, Mean_ioU: 0.03288920223712921
+2023-10-12 18:38:02,027 [trainer.py:210] INFO: Epoch : 10, Train_loss : nan, Mean_ioU: 0.032949481159448624

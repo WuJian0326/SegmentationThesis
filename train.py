@@ -106,8 +106,8 @@ def train_model():
     val_loader = DataLoader(val_data, batch_size=batch_size, num_workers=num_worker, pin_memory=True)
 
     model = smp.Unet(
-        encoder_name="efficientnet-b7",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-        # encoder_weights="imagenet",  # use `imagenet` pre-trained weights for encoder initialization
+        encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
+
         in_channels=in_channels,  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
         classes=num_class,  # model output channels (number of classes in your dataset)
     ).to(device)

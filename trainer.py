@@ -109,6 +109,8 @@ class trainer():
                 
 
                 p1 = self.model(image)
+                # print(p1.shape)
+                # print(label.shape)
                 loss_ce1 = self.criterion1(p1, label)
                 loss_dice1 = self.criterion2(p1, label, softmax=False)
                 loss1 = 0.3 * loss_ce1 + 0.7*loss_dice1

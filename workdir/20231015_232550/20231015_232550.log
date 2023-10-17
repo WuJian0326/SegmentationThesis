@@ -1,0 +1,19 @@
+2023-10-15 23:25:52,842 [train.py:60] INFO: learning rate : 0.0001
+2023-10-15 23:25:52,842 [train.py:61] INFO: batch size : 4
+2023-10-15 23:25:52,842 [train.py:62] INFO: num epoch : 300
+2023-10-15 23:25:52,842 [train.py:63] INFO: trainflow: 10
+2023-10-15 23:25:52,842 [train.py:84] INFO: ==========Start training=========
+2023-10-15 23:26:57,686 [trainer.py:142] INFO: Epoch : 1, Train_loss : 0.6265825033187866, Mean_ioU: 0.033146392554044724, Mean_Dice: 0.06361391395330429
+2023-10-15 23:27:58,998 [trainer.py:142] INFO: Epoch : 2, Train_loss : 0.6092270612716675, Mean_ioU: 0.003525493899360299, Mean_Dice: 0.006851462181657553
+2023-10-15 23:29:00,299 [trainer.py:142] INFO: Epoch : 3, Train_loss : 0.5845535397529602, Mean_ioU: 0.0, Mean_Dice: 0.0
+2023-10-15 23:30:01,505 [trainer.py:142] INFO: Epoch : 4, Train_loss : 0.5788681507110596, Mean_ioU: 0.0, Mean_Dice: 0.0
+2023-10-15 23:31:03,014 [trainer.py:142] INFO: Epoch : 5, Train_loss : 0.5780265927314758, Mean_ioU: 0.0, Mean_Dice: 0.0
+2023-10-15 23:32:05,206 [trainer.py:142] INFO: Epoch : 6, Train_loss : 0.5762826204299927, Mean_ioU: 0.0, Mean_Dice: 0.0
+2023-10-15 23:33:07,182 [trainer.py:142] INFO: Epoch : 7, Train_loss : 0.5733311176300049, Mean_ioU: 0.0, Mean_Dice: 0.0
+2023-10-15 23:34:09,231 [trainer.py:142] INFO: Epoch : 8, Train_loss : 0.570013165473938, Mean_ioU: 0.0, Mean_Dice: 0.0
+2023-10-15 23:35:10,514 [trainer.py:142] INFO: Epoch : 9, Train_loss : 0.5673325061798096, Mean_ioU: 0.0, Mean_Dice: 0.0
+2023-10-15 23:36:12,040 [trainer.py:142] INFO: Epoch : 10, Train_loss : 0.5659895539283752, Mean_ioU: 0.0, Mean_Dice: 0.0
+2023-10-15 23:36:15,990 [trainer.py:190] INFO: Validation: Loss : 0.5624424815177917, mIoU : 0.0, mDice : 0.0
+2023-10-15 23:37:17,202 [trainer.py:142] INFO: Epoch : 11, Train_loss : 0.5504838228225708, Mean_ioU: 0.0, Mean_Dice: 0.0
+2023-10-15 23:38:19,241 [trainer.py:142] INFO: Epoch : 12, Train_loss : 0.527231752872467, Mean_ioU: 0.0004099540819879621, Mean_Dice: 0.0008129962370730937
+2023-10-15 23:39:20,913 [trainer.py:142] INFO: Epoch : 13, Train_loss : 0.5205103158950806, Mean_ioU: 0.00523369200527668, Mean_Dice: 0.01026298850774765

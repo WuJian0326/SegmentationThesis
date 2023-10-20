@@ -50,11 +50,13 @@ train_data = ImageDataLoader(
                             txt_file = train_txt,
                             transform=train_transform
                               )
-train_loader = DL(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)
+train_loader = DL(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True, drop_last=True)
 
 netG = Generator().to(device)
 netD = Discriminator().to(device)
+netE = Encoder().to(device)
 
+netE.apply(weights_init)
 netG.apply(weights_init)
 netD.apply(weights_init)
 
@@ -63,6 +65,8 @@ netD.apply(weights_init)
 criterion = nn.BCELoss()
 optimizerG = optim.Adam(netG.parameters(), lr=LEARNING_RATE, betas=(beta1, 0.999))
 optimizerD = optim.Adam(netD.parameters(), lr=LEARNING_RATE, betas=(beta1, 0.999))
+optimizerE = optim.Adam(netE.parameters(), lr=LEARNING_RATE, betas=(beta1, 0.999))
+
 real_label = 1.
 fake_label = 0.
 # 訓練
@@ -88,7 +92,7 @@ for epoch in range(num_epochs):
 
         # 使用切片操作裁剪 data
         data = data[:, :, crop_y:crop_y+128, crop_x:crop_x+128]
-        print(data.shape)
+        # print(data.shape)
         rgb_image = torch.zeros((data.shape[0], 3, data.shape[2], data.shape[3]))
 
 # 将单通道数据复制到三通道中
@@ -101,55 +105,85 @@ for epoch in range(num_epochs):
         # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
         ###########################
         ## Train with all-real batch
-        netD.zero_grad()
-        # Format batch
-        real_cpu = data.to(device) # what does cpu mean?
-        # print(real_cpu.shape)
-        b_size = real_cpu.size(0)
-        label = torch.full((b_size,), real_label, dtype=torch.float, device=device)
         
-        # Forward pass real batch through D
-        output = netD(real_cpu).view(-1)
-        # print(output.shape)
-        # Calculate loss on all-real batch
-        errD_real = criterion(output, label)
-        # Calculate gradients for D in backward pass
-        errD_real.backward()
-        D_x = output.mean().item()
+        
 
-        ## Train with all-fake batch
-        # Generate batch of latent vectors
+        netD.zero_grad()
+        real_cpu = data.to(device)
+        b_size = real_cpu.size(0)
+        
+        label = torch.full((b_size,), real_label, dtype=torch.float, device=device)
+
+        # 經過 Encoder 的真實圖像
+        encoded_real = netE(real_cpu).to(device)
+        encoded_real = encoded_real.view(batch_size, -1)
+
+        linear = nn.Linear(100, 3*128*128).to(device)
+        encoded_real = linear(encoded_real).to(device)
+        encoded_real = encoded_real.view(batch_size, 3, 128, 128)
+        # print('E(x)',encoded_real.shape)
+        # print('x',real_cpu.shape)
+        # 串聯 x 和 E(x)
+        combined_input = torch.cat([real_cpu, encoded_real], dim=1)
+
+
+
+        output_real = netD(combined_input).view(-1)
+        errD_real = criterion(output_real, label)
+        errD_real.backward()
+        D_x = output_real.mean().item()
+
+        # 生成假圖像
         noise = torch.randn(b_size, nz, 1, 1, device=device)
-        # Generate fake image batch with G
         fake = netG(noise)
+
+        # 經過 Encoder 的假圖像
+        z = noise.view(batch_size, -1)
+        # print("z",z.shape)
+        # print("Gz",fake.shape)
+        linear = nn.Linear(100, 3*128*128).to(device)
+        resizeNoise = linear(z).to(device)
+        resizeNoise = resizeNoise.view(batch_size, 3, 128, 128)
+
+        combined_GZ = torch.cat([fake, resizeNoise], dim=1)
+        # print("combined",combined_GZ.shape)
+        output_fake = netD(combined_GZ).view(-1)
+
+
         label.fill_(fake_label)
-        # Classify all fake batch with D
-        output = netD(fake.detach()).view(-1)
-        # Calculate D's loss on the all-fake batch
-        errD_fake = criterion(output, label)
-        # Calculate the gradients for this batch
+        errD_fake = criterion(output_fake, label)
         errD_fake.backward()
-        D_G_z1 = output.mean().item()
-        # Add the gradients from the all-real and all-fake batches
+        D_G_z1 = output_fake.mean().item()
+
         errD = errD_real + errD_fake
-        # Update D
         optimizerD.step()
 
         ############################
-        # (2) Update G network: maximize log(D(G(z)))
+        netE.zero_grad()
+        encoded_x = netE(real_cpu)
+        encoded_x = encoded_x.view(batch_size, -1)
+        encoded_x = linear(encoded_x)
+        encoded_x = encoded_x.view(batch_size, 3, 128, 128)
+        output = netD(torch.cat([real_cpu, encoded_x], dim=1))  
+        errE = criterion(output, torch.ones_like(output))
+        errE.backward()
+        optimizerE.step()
         ###########################
         netG.zero_grad()
-        label.fill_(real_label)  # fake labels are real for generator cost
-        # Since we just updated D, perform another forward pass of all-fake batch through D
-        output = netD(fake).view(-1)
-        # Calculate G's loss based on this output
-        errG = criterion(output, label)
-        # Calculate gradients for G
+        fake = netG(noise)
+        noise = noise.view(batch_size, -1)
+        noise = linear(noise)
+        noise = noise.view(batch_size, 3, 128, 128)
+
+        output = netD(torch.cat([fake, noise], dim=1)) 
+
+        errG = criterion(output, torch.ones_like(output))
         errG.backward()
         D_G_z2 = output.mean().item()
-        # Update G
         optimizerG.step()
         
+
+
         # Output training stats
         if i % 50 == 0:
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'

@@ -40,8 +40,9 @@ def get_transform():
             #                    p=0.3),
             A.RandomRotate90(),
         ], p=0.3),
-
+        A.Normalize(mean=[0.5], std=[0.5], max_pixel_value=255.0),
         ToTensorV2(),
+        
     ])
 
     return transform

@@ -16,9 +16,8 @@ data_path = '/home/student/Desktop/SegmentationThesis/data/microglia/'
 train_txt = '/home/student/Desktop/SegmentationThesis/data/train.txt'
 train_transform = get_transform()
 # 超參數
-EPOCHS = 10
-BATCH_SIZE = 128
-LEARNING_RATE = 0.001
+
+LEARNING_RATE = 0.0002
 
 
 batch_size = 128
@@ -33,8 +32,7 @@ nc = 1
 # Size of z latent vector (i.e. size of generator input)
 nz = 100
 
-# Learning rate for optimizers
-lr = 0.0002
+
 
 # Beta1 hyperparam for Adam optimizers
 beta1 = 0.5
@@ -50,13 +48,15 @@ train_data = ImageDataLoader(
                             txt_file = train_txt,
                             transform=train_transform
                               )
-train_loader = DL(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)
+train_loader = DL(dataset=train_data, batch_size=batch_size, shuffle=True)
 
-netG = Generator().to(device)
-netD = Discriminator().to(device)
-
+netG = Generator64().to(device)
+netD = Discriminator64().to(device)
+print(netG)
 netG.apply(weights_init)
 netD.apply(weights_init)
+# netG.load_state_dict(torch.load('netGnormallize.pth'))
+# netD.load_state_dict(torch.load('netDnormallize.pth'))
 
 
 # 損失函數
@@ -83,12 +83,12 @@ for epoch in range(num_epochs):
         data = data.float()
 
         # print(data.shape)
-        crop_x = (224 - 128) // 2
-        crop_y = (224 - 128) // 2
+        crop_x = (224 - 64) // 2
+        crop_y = (224 - 64) // 2
 
         # 使用切片操作裁剪 data
-        data = data[:, :, crop_y:crop_y+128, crop_x:crop_x+128]
-        print(data.shape)
+        data = data[:, :, crop_y:crop_y+64, crop_x:crop_x+64]
+        # print(data.shape)
         rgb_image = torch.zeros((data.shape[0], 3, data.shape[2], data.shape[3]))
 
 # 将单通道数据复制到三通道中
@@ -161,12 +161,18 @@ for epoch in range(num_epochs):
         D_losses.append(errD.item())
         
         # Check how the generator is doing by saving G's output on fixed_noise
-        if (iters % 500 == 0) or ((epoch == num_epochs-1) and (i == len(train_loader)-1)):
+        if (iters % 100 == 0) or ((epoch == num_epochs-1) and (i == len(train_loader)-1)):
             with torch.no_grad():
                 fake = netG(fixed_noise).detach().cpu()
             img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
+            # plt.figure(figsize=(15,15))
+            # plt.axis("off")
+            # plt.title("Fake Images")
+            # plt.imshow(np.transpose(vutils.make_grid(fake, padding=2, normalize=True),(1,2,0)))
+            # plt.show()
             
         iters += 1
+
 
 torch.save(netG.state_dict(), 'netG.pth')
 torch.save(netD.state_dict(), 'netD.pth')

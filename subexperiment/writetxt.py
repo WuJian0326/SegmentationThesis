@@ -2,7 +2,7 @@ import os
 import random
 
 # 資料資料夾路徑
-folder_path = '../data/mask'
+folder_path = '../data/microglia/mask'
 
 # 獲取資料夾內的所有檔案名稱
 file_names = os.listdir(folder_path)

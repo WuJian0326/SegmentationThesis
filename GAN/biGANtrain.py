@@ -34,7 +34,7 @@ nc = 1
 nz = 100
 
 # Learning rate for optimizers
-lr = 0.0002
+lr = 0.001
 
 # Beta1 hyperparam for Adam optimizers
 beta1 = 0.5
@@ -70,7 +70,7 @@ optimizerE = optim.Adam(netE.parameters(), lr=LEARNING_RATE, betas=(beta1, 0.999
 real_label = 1.
 fake_label = 0.
 # 訓練
-num_epochs = 150
+num_epochs = 100
 # Lists to keep track of progress
 img_list = []
 G_losses = []
@@ -93,14 +93,14 @@ for epoch in range(num_epochs):
         # 使用切片操作裁剪 data
         data = data[:, :, crop_y:crop_y+128, crop_x:crop_x+128]
         # print(data.shape)
-        rgb_image = torch.zeros((data.shape[0], 3, data.shape[2], data.shape[3]))
+#         rgb_image = torch.zeros((data.shape[0], 3, data.shape[2], data.shape[3]))
 
-# 将单通道数据复制到三通道中
-        rgb_image[:, 0, :, :] = data[:, 0, :, :]
-        rgb_image[:, 1, :, :] = data[:, 0, :, :]
-        rgb_image[:, 2, :, :] = data[:, 0, :, :]
-        data = rgb_image
-        # print(data.shape)
+# # 将单通道数据复制到三通道中
+#         rgb_image[:, 0, :, :] = data[:, 0, :, :]
+#         rgb_image[:, 1, :, :] = data[:, 0, :, :]
+#         rgb_image[:, 2, :, :] = data[:, 0, :, :]
+        
+        print(data.shape)
         ############################
         # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
         ###########################
@@ -118,9 +118,9 @@ for epoch in range(num_epochs):
         encoded_real = netE(real_cpu).to(device)
         encoded_real = encoded_real.view(batch_size, -1)
 
-        linear = nn.Linear(100, 3*128*128).to(device)
+        linear = nn.Linear(100, 1*128*128).to(device)
         encoded_real = linear(encoded_real).to(device)
-        encoded_real = encoded_real.view(batch_size, 3, 128, 128)
+        encoded_real = encoded_real.view(batch_size, 1, 128, 128)
         # print('E(x)',encoded_real.shape)
         # print('x',real_cpu.shape)
         # 串聯 x 和 E(x)
@@ -141,9 +141,9 @@ for epoch in range(num_epochs):
         z = noise.view(batch_size, -1)
         # print("z",z.shape)
         # print("Gz",fake.shape)
-        linear = nn.Linear(100, 3*128*128).to(device)
+        linear = nn.Linear(100, 1*128*128).to(device)
         resizeNoise = linear(z).to(device)
-        resizeNoise = resizeNoise.view(batch_size, 3, 128, 128)
+        resizeNoise = resizeNoise.view(batch_size, 1, 128, 128)
 
         combined_GZ = torch.cat([fake, resizeNoise], dim=1)
         # print("combined",combined_GZ.shape)
@@ -163,7 +163,7 @@ for epoch in range(num_epochs):
         encoded_x = netE(real_cpu)
         encoded_x = encoded_x.view(batch_size, -1)
         encoded_x = linear(encoded_x)
-        encoded_x = encoded_x.view(batch_size, 3, 128, 128)
+        encoded_x = encoded_x.view(batch_size, 1, 128, 128)
         output = netD(torch.cat([real_cpu, encoded_x], dim=1))  
         errE = criterion(output, torch.ones_like(output))
         errE.backward()
@@ -173,7 +173,7 @@ for epoch in range(num_epochs):
         fake = netG(noise)
         noise = noise.view(batch_size, -1)
         noise = linear(noise)
-        noise = noise.view(batch_size, 3, 128, 128)
+        noise = noise.view(batch_size, 1, 128, 128)
 
         output = netD(torch.cat([fake, noise], dim=1)) 
 
@@ -184,7 +184,7 @@ for epoch in range(num_epochs):
         
 
 
-        # Output training stats
+        # Output training stats 
         if i % 50 == 0:
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
                   % (epoch, num_epochs, i, len(train_loader),

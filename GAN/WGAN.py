@@ -97,8 +97,8 @@ netG.apply(weights_init)
 
 lr = 1e-4
 betas = (.9, .99)
-oprimizerG = optim.Adam(netG.parameters(), lr=lr, betas=betas)
-oprimizerD = optim.Adam(netD.parameters(), lr=lr, betas=betas)
+oprimizerG = optim.RMSprop(netG.parameters(), lr=lr)
+oprimizerD = optim.RMSprop(netD.parameters(), lr=lr)
 
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 real_label = 1.

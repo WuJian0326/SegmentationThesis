@@ -30,7 +30,7 @@ image_size = 128
 nc = 1
 
 # Size of z latent vector (i.e. size of generator input)
-nz = 100
+nz = 64
 
 
 
@@ -50,19 +50,19 @@ train_data = ImageDataLoader(
                               )
 train_loader = DL(dataset=train_data, batch_size=batch_size, shuffle=True)
 
-netG = Generator64().to(device)
-netD = Discriminator64().to(device)
+netG = Generator(nz = nz).to(device)
+netD = Discriminator().to(device)
 print(netG)
-netG.apply(weights_init)
+# netG.apply(weights_init)
 netD.apply(weights_init)
-# netG.load_state_dict(torch.load('netGnormallize.pth'))
+# netG.load_state_dict(torch.load('netG.pth'))
 # netD.load_state_dict(torch.load('netDnormallize.pth'))
 
 
 # 損失函數
 criterion = nn.BCELoss()
-optimizerG = optim.Adam(netG.parameters(), lr=LEARNING_RATE, betas=(beta1, 0.999))
-optimizerD = optim.Adam(netD.parameters(), lr=LEARNING_RATE, betas=(beta1, 0.999))
+optimizerG = optim.Adam(netG.parameters(), lr=0.0002, betas=(beta1, 0.999))
+optimizerD = optim.Adam(netD.parameters(), lr=0.001, betas=(beta1, 0.999))
 real_label = 1.
 fake_label = 0.
 # 訓練
@@ -83,11 +83,11 @@ for epoch in range(num_epochs):
         data = data.float()
 
         # print(data.shape)
-        crop_x = (224 - 64) // 2
-        crop_y = (224 - 64) // 2
+        crop_x = (224 - 128) // 2
+        crop_y = (224 - 128) // 2
 
         # 使用切片操作裁剪 data
-        data = data[:, :, crop_y:crop_y+64, crop_x:crop_x+64]
+        data = data[:, :, crop_y:crop_y+128, crop_x:crop_x+128]
         # print(data.shape)
         rgb_image = torch.zeros((data.shape[0], 3, data.shape[2], data.shape[3]))
 
@@ -107,7 +107,7 @@ for epoch in range(num_epochs):
         # print(real_cpu.shape)
         b_size = real_cpu.size(0)
         label = torch.full((b_size,), real_label, dtype=torch.float, device=device)
-        
+
         # Forward pass real batch through D
         output = netD(real_cpu).view(-1)
         # print(output.shape)

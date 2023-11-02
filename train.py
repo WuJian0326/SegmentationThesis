@@ -69,7 +69,6 @@ pin_memory = True
 
 
 SMOOTH = 1e-6
-color_map = np.array([[0, 0, 0], [128, 128, 128], [255, 0, 0], [0, 0, 255]])
 
 
 
@@ -113,10 +112,10 @@ def train_model():
     #     classes=num_class,  # model output channels (number of classes in your dataset)
     # ).to(device)
 
-    # model = FCT().to(device)
+    model = FCT().to(device)
 
-    model = SwinUnet(img_size=image_size, in_chans=3, num_classes=num_class
-            ).to(device)
+    # model = SwinUnet(img_size=image_size, in_chans=3, num_classes=num_class
+    #         ).to(device)
 
 
     loss_function１ = nn.CrossEntropyLoss()

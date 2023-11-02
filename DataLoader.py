@@ -50,9 +50,11 @@ def get_transform():
 def get_vaild_transform():
     transform = A.Compose([
         A.Resize(224, 224),
-
+        A.Normalize(mean=[0.5], std=[0.5], max_pixel_value=255.0),
         ToTensorV2(),
+        
     ])
+    
     return transform
 
 def generate_cell_kernel(image):
@@ -123,20 +125,20 @@ class ImageDataLoader(Dataset):
         if self.transform:
             augmentations = self.transform(image=image, mask=mask)
 
-        if np.random.rand() < 0.5:
-            image2, mask2, _ = self.__getitem__(np.random.randint(0, len(self.txt_list)))
-            # print(image2.shape)
-            # image = cv2.resize(image, (64, 64))
-            # mask = cv2.resize(mask, (64, 64))
-            image = torch.from_numpy(image)
-            mask = torch.from_numpy(mask)
-            lam = np.random.beta(a=1.0, b=1.0)
-            image = image.unsqueeze(0)
+        # if np.random.rand() < 0.5:
+        #     image2, mask2, _ = self.__getitem__(np.random.randint(0, len(self.txt_list)))
+        #     # print(image2.shape)
+        #     # image = cv2.resize(image, (64, 64))
+        #     # mask = cv2.resize(mask, (64, 64))
+        #     image = torch.from_numpy(image)
+        #     mask = torch.from_numpy(mask)
+        #     lam = np.random.beta(a=1.0, b=1.0)
+        #     image = image.unsqueeze(0)
 
-            image = torch.cat([lam*image, (1-lam)*image2], dim=0)
-            mask = torch.cat([lam*mask, (1-lam)*mask2], dim=0)
+        #     image = torch.cat([lam*image, (1-lam)*image2], dim=0)
+        #     mask = torch.cat([lam*mask, (1-lam)*mask2], dim=0)
 
-            # print(image.shape)
+        #     # print(image.shape)
             
         image = augmentations["image"] 
         mask = augmentations["mask"]
@@ -144,4 +146,59 @@ class ImageDataLoader(Dataset):
         # print('mask',mask.shape)
         return image, mask, img_path
 
+
+class FakeDataLoader(Dataset):
+    def __init__(self,  data_path, txt_file, transform=None):
+        self.txt_file = txt_file
+        self.txt_list = load_file_list(self.txt_file)
+        self.data_path = data_path
+        
+
+        self.transform = transform
+
+    
+    def __len__(self):
+        return len(self.txt_list)
+
+    def __getitem__(self, index):
+
+
+
+        img_path =  self.data_path + 'FakeAll/' + self.txt_list[index]
+
+
+
+        image = np.array(Image.open(img_path).convert('L'))
+        # plt.imshow(image)
+        # plt.show()
+
+
+        padding_image = np.zeros((224, 224))
+        padding_image[48:176, 48:176] = image
+
+        if self.transform:
+            augmentations = self.transform(image=padding_image)
+
+        # if np.random.rand() < 0.5:
+        #     image2, mask2, _ = self.__getitem__(np.random.randint(0, len(self.txt_list)))
+        #     # print(image2.shape)
+        #     # image = cv2.resize(image, (64, 64))
+        #     # mask = cv2.resize(mask, (64, 64))
+        #     image = torch.from_numpy(image)
+        #     mask = torch.from_numpy(mask)
+        #     lam = np.random.beta(a=1.0, b=1.0)
+        #     image = image.unsqueeze(0)
+
+        #     image = torch.cat([lam*image, (1-lam)*image2], dim=0)
+        #     mask = torch.cat([lam*mask, (1-lam)*mask2], dim=0)
+
+        #     # print(image.shape)
+        mask = torch.zeros((224, 224))
+        image = augmentations["image"] 
+        # print(image.shape)
+        # print(mask.shape)
+        # mask = augmentations["mask"]
+        # print('image',image.shape)
+        # print('mask',mask.shape)
+        return image, mask, img_path
 

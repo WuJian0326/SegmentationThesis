@@ -8,6 +8,7 @@ torch.backends.cudnn.benchmark = True
 from time import time as tm
 import matplotlib.pyplot as plt
 SMOOTH = 1e-6
+from config import args
 # from memory_profiler import profile
 
 def _to_one_hot(y, num_classes):
@@ -189,3 +190,195 @@ class trainer():
 
         l.info(f'Validation: Loss : {total_loss}, mIoU : {total_IoU}, mDice : {total_Dice}')
         self.best_loss = save_checkpoint(self.model, self.best_loss, total_loss, epo)
+
+
+class semi_trainer():
+    def __init__(self, train_ds, val_ds, model1, model2, optimizer1, optimizer2, scheduler1, scheduler2,
+                 criterion1, criterion2, epochs=500,best_acc=None, num_class = 2,trainflow = 2, consistency_weight = 0.1):
+        self.train_ds = train_ds
+        self.val_ds = val_ds
+        self.model1 = model1
+        self.model2 = model2
+        self.optimizer1 = optimizer1
+        self.optimizer2 = optimizer2
+        self.scheduler1 = scheduler1
+        self.scheduler2 = scheduler2
+        self.criterion1 = criterion1
+        self.criterion2 = criterion2
+        self.epochs = epochs
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.best_loss = best_acc
+        self.scaler1 = torch.cuda.amp.GradScaler()
+        self.scaler2 = torch.cuda.amp.GradScaler()
+        self.num_class = num_class
+        self.trainflow = trainflow
+        self.consistency_weight = consistency_weight
+
+    def training(self):
+        for idx in range(self.epochs):
+            self.train_epoch(idx)
+            if ((idx+1) % self.trainflow == 0):
+                self.validate(idx)
+        return self.model1
+
+
+
+    def train_epoch(self,epo):
+
+        #
+        torch.set_grad_enabled(True)
+        self.model1.train()
+        self.model2.train()
+        total_loss1 = 0
+        total_IoU1 = 0
+        total_Dice1 = 0
+
+        total_loss2 = 0
+        total_IoU2 = 0
+        total_Dice2 = 0
+
+        TrainLoader = tqdm(self.train_ds)
+
+
+        for idx, (img, label, img_path) in enumerate(TrainLoader):
+
+            volume_batch, label_batch = img.half(), label.unsqueeze(1).float()
+            volume_batch, label_batch = volume_batch.cuda().float(), label_batch.cuda()
+            
+
+
+            with torch.cuda.amp.autocast():
+                output1 = self.model1(volume_batch)
+                output2 = self.model2(volume_batch)
+                # print(output1[:args.labeled_bs].shape)
+                # print(label_batch[:args.labeled_bs].shape)
+
+                output1_softmax = torch.softmax(output1, dim=1)
+                output2_softmax = torch.softmax(output2, dim=1)
+                consistency_weight = self.consistency_weight * (epo / self.epochs)
+
+                loss1 = 0.5 * (self.criterion1(output1[:args.labeled_bs], label_batch[:args.labeled_bs]) + self.criterion2(
+                    output1_softmax[:args.labeled_bs], label_batch[:args.labeled_bs]))
+                loss2 = 0.5 * (self.criterion1(output2[:args.labeled_bs], label_batch[:args.labeled_bs]) + self.criterion2(
+                    output2_softmax[:args.labeled_bs], label_batch[:args.labeled_bs]))
+                
+                pseudo_outputs1 = torch.argmax(
+                    output1_softmax[args.labeled_bs:].detach(), dim=1, keepdim=False)
+                pseudo_outputs2 = torch.argmax(
+                    output2_softmax[args.labeled_bs:].detach(), dim=1, keepdim=False)
+                
+                pseudo_supervision1 = self.criterion2(
+                    output1_softmax[args.labeled_bs:], pseudo_outputs2.unsqueeze(1))
+                pseudo_supervision2 = self.criterion2(
+                    output2_softmax[args.labeled_bs:], pseudo_outputs1.unsqueeze(1))
+                
+                model1_loss = loss1 + consistency_weight * pseudo_supervision1
+                model2_loss = loss2 + consistency_weight * pseudo_supervision2
+
+
+
+
+
+
+            self.scaler1.scale(model1_loss).backward()
+            self.scaler1.step(self.optimizer1)
+            self.scaler1.update()
+
+            self.scaler2.scale(model2_loss).backward()
+            self.scaler2.step(self.optimizer2)
+            self.scaler2.update()
+
+
+
+            TrainLoader.set_description('Epoch ' + str(epo + 1))
+            total_loss1 += model1_loss
+            total_loss2 += model2_loss
+            
+
+
+        train_loss1 = total_loss1 / len(self.train_ds)
+        train_loss2 = total_loss2 / len(self.train_ds)
+
+
+        self.scheduler1.step()
+        self.scheduler2.step()
+        l.info(f'Epoch : {epo + 1}, Train_loss1 : {train_loss1}, Train_loss2 : {train_loss2}')
+
+
+    def validate(self,epo):
+
+        self.model1.eval()
+        self.model2.eval()
+        total_IoU1 = 0
+        total_loss1 = 0
+        total_Dice1 = 0
+        
+        total_IoU2 = 0
+        total_loss2 = 0
+        total_Dice2 = 0
+
+        with torch.no_grad():
+            self.model1.eval()
+            self.model2.eval()
+            ValLoader = tqdm(self.val_ds)
+            for idx, (img, mask, img_path) in enumerate(ValLoader):
+                image = img
+                mask = mask
+                label = mask.long()
+                image = image.float()
+                image = image.to(self.device) 
+                label = label.unsqueeze(1).to(self.device).float()
+
+                p1 = self.model1(image)
+                loss_ce1 = self.criterion1(p1, label)
+                loss_dice1 = self.criterion2(p1, label, softmax=False)
+                loss1 = 0.3 * loss_ce1 + 0.7 * loss_dice1
+
+                outputs1 = p1 
+
+                p2 = self.model2(image)
+                loss_ce2 = self.criterion1(p2, label)
+                loss_dice2 = self.criterion2(p2, label, softmax=False)
+                loss2 = 0.3 * loss_ce2 + 0.7 * loss_dice2
+
+                outputs2 = p2
+
+
+
+                outputs1[outputs1 > 0.5] = 1
+                outputs1[outputs1 <= 0.5] = 0
+
+                outputs2[outputs2 > 0.5] = 1
+                outputs2[outputs2 <= 0.5] = 0
+
+                miou1 = compute_miou(outputs1,label)
+                Dice1 = compute_dice(outputs1,label)
+
+                miou2 = compute_miou(outputs2,label)
+                Dice2 = compute_dice(outputs2,label)
+
+
+                total_loss1 += loss1
+                total_IoU1 += miou1
+                total_Dice1 += Dice1
+
+                total_loss2 += loss2
+                total_IoU2 += miou2
+                total_Dice2 += Dice2
+
+                
+
+        total_loss1 = total_loss1 / len(self.val_ds)
+        total_IoU1 = total_IoU1 / len(self.val_ds)
+        total_Dice1 = total_Dice1 / len(self.val_ds)
+
+        total_loss2 = total_loss2 / len(self.val_ds)
+        total_IoU2 = total_IoU2 / len(self.val_ds)
+        total_Dice2 = total_Dice2 / len(self.val_ds)
+
+
+        l.info(f'Model1 Validation: Loss : {total_loss1}, mIoU : {total_IoU1}, mDice : {total_Dice1}')
+        l.info(f'Model2 Validation: Loss : {total_loss2}, mIoU : {total_IoU2}, mDice : {total_Dice2}')
+
+        self.best_loss = save_checkpoint(self.model1, self.best_loss, total_loss1, epo)
+        self.best_loss = save_checkpoint(self.model2, self.best_loss, total_loss2, epo)

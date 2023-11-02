@@ -1,0 +1,11 @@
+2023-11-02 19:40:01,109 [semi.py:45] INFO: learning rate : 0.001
+2023-11-02 19:40:01,109 [semi.py:46] INFO: batch size : 16
+2023-11-02 19:40:01,109 [semi.py:47] INFO: num epoch : 300
+2023-11-02 19:40:01,109 [semi.py:48] INFO: trainflow: 1
+2023-11-02 19:40:01,109 [semi.py:62] INFO: ==========Start semi training=========
+2023-11-02 19:41:10,621 [trainer.py:304] INFO: Epoch : 1, Train_loss : 0.4674946069717407
+2023-11-02 19:41:12,234 [trainer.py:379] INFO: Model1 Validation: Loss : 0.6952757835388184, mIoU : 0.03712761402130127, mDice : 0.07090426236391068
+2023-11-02 19:41:12,234 [trainer.py:380] INFO: Model2 Validation: Loss : 0.6964012980461121, mIoU : 0.023924559354782104, mDice : 0.046449050307273865
+2023-11-02 19:42:18,769 [trainer.py:304] INFO: Epoch : 2, Train_loss : 0.4708104431629181
+2023-11-02 19:42:20,193 [trainer.py:379] INFO: Model1 Validation: Loss : 0.6957982778549194, mIoU : 0.036959171295166016, mDice : 0.07058751583099365
+2023-11-02 19:42:20,194 [trainer.py:380] INFO: Model2 Validation: Loss : 0.6964012980461121, mIoU : 0.023924559354782104, mDice : 0.046449050307273865

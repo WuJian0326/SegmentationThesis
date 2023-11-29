@@ -105,14 +105,14 @@ def train_model():
 
     val_loader = DataLoader(val_data, batch_size=batch_size, num_workers=num_worker, pin_memory=True)
 
-    # model = smp.Unet(
-    #     encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
+    model = smp.Unet(
+        encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
 
-    #     in_channels=in_channels,  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-    #     classes=num_class,  # model output channels (number of classes in your dataset)
-    # ).to(device)
+        in_channels=in_channels,  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
+        classes=num_class,  # model output channels (number of classes in your dataset)
+    ).to(device)
 
-    model = FCT().to(device)
+    # model = FCT().to(device)
 
     # model = SwinUnet(img_size=image_size, in_chans=3, num_classes=num_class
     #         ).to(device)
@@ -124,8 +124,7 @@ def train_model():
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     
-
-    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=1e-6, last_epoch=-1)
+    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
     train = trainer(train_loader, val_loader, model, optimizer, scheduler, loss_function1,loss_function2,
                     epochs=num_epoch, best_acc=None, num_class= num_class, trainflow = trainflow)

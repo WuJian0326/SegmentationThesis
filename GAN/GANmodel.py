@@ -134,6 +134,44 @@ class Generator(nn.Module):
         # print(output.shape)
         return output
     
+import torch.nn as nn
+
+class CustomGenerator(nn.Module):
+    def __init__(self, nz=100, ngf=64, nc=3):
+        super(CustomGenerator, self).__init__()
+
+        self.c1 = nn.ConvTranspose2d(nz, ngf * 8, 8, 1, 0, bias=False)
+        self.b1 = nn.BatchNorm2d(ngf * 8)
+        self.r1 = nn.ReLU(True)
+        # state size. (ngf*8) x 8 x 8
+
+        self.c2 = nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False)
+        self.b2 = nn.BatchNorm2d(ngf * 4)
+        self.r2 = nn.ReLU(True)
+        # state size. (ngf*4) x 16 x 16
+
+        self.c3 = nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False)
+        self.b3 = nn.BatchNorm2d(ngf * 2)
+        self.r3 = nn.ReLU(True)
+        # state size. (ngf*2) x 32 x 32
+
+        self.c4 = nn.ConvTranspose2d(ngf * 2, ngf, 4, 2, 1, bias=False)
+        self.b4 = nn.BatchNorm2d(ngf)
+        self.r4 = nn.ReLU(True)
+
+        self.c5 = nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False)  # Adjusted kernel and stride
+        self.t1 = nn.Tanh()
+        # state size. (nc) x 128 x 128
+
+    def forward(self, input):
+        x = self.r1(self.b1(self.c1(input)))
+        x = self.r2(self.b2(self.c2(x)))
+        x = self.r3(self.b3(self.c3(x)))
+        x = self.r4(self.b4(self.c4(x)))
+        x = self.t1(self.c5(x))  # Use adjusted layer with modified kernel and stride
+        return x
+
+
 
 class Generator256(nn.Module):
     def __init__(self, nz=100, ngf=64, nc=3):
@@ -533,7 +571,39 @@ class Discriminator(nn.Module):
     def forward(self, x):
         return self.net(x)
     
+class PatchDiscriminator(nn.Module):
+    def __init__(self, in_channels):
+        super(PatchDiscriminator, self).__init__()
+        
+        def discriminator_block(in_filters, out_filters, normalization=False):
+            """Returns downsampling layers of each discriminator block"""
+            layers = [nn.Conv2d(in_filters, out_filters, 4, stride=2, padding=1)]
+            if normalization:
+                layers.append(nn.InstanceNorm2d(out_filters))
+            layers.append(nn.LeakyReLU(0.2, inplace=True))
+            return layers
 
+        self.model = nn.Sequential(
+            *discriminator_block(in_channels, 64, normalization=False),
+            *discriminator_block(64, 128),
+            *discriminator_block(128, 256),
+            *discriminator_block(256, 512),
+            nn.ZeroPad2d((1, 0, 1, 0)),
+            nn.Conv2d(512, 1, 4, padding=1, bias=False)
+        )
+
+    def forward(self, img):
+        # 分割为patch
+        patch_outs = []
+        for i in range(0, img.shape[2], 16):
+            for j in range(0, img.shape[3], 16):
+                x = img[:,:, i:i+16, j:j+16]
+                patch_out = self.model(x) 
+                patch_outs.append(patch_out)
+        
+        # 求所有patch的平均值作为最终输出    
+        return torch.mean(torch.cat(patch_outs, 0), 0)
+    
 class DiscriminatorU(nn.Module):
     def __init__(self, in_channels=2, num_filters=64):
         super(DiscriminatorU, self).__init__()

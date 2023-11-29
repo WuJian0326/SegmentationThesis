@@ -82,13 +82,12 @@ def semi_train_model():
                               )
 
     
-    
-    
+       
 
 
 
-    labeled_idxs = list(range(len(label_data)))
-    unlabeled_idxs = list(range(len(unlabel_data)))
+    labeled_idxs = list(range(0, len(label_data)))
+    unlabeled_idxs = list(range(len(label_data), len(label_data) + len(unlabel_data)))
 
     batch_sampler = TwoStreamBatchSampler(
         labeled_idxs, unlabeled_idxs, batch_size, batch_size- args.labeled_bs)
@@ -114,6 +113,9 @@ def semi_train_model():
 
     model2 = SwinUnet(img_size=image_size, in_chans=3, num_classes=num_class
             ).to(device)
+    
+    # model1 =  load_checkpoint(model1,path='checkpoint/ckpt_model1_49.pth')
+    # model2 =  load_checkpoint(model2,path='checkpoint/ckpt_model2_114.pth')
 
 
     loss_function１ = nn.CrossEntropyLoss()
@@ -124,8 +126,8 @@ def semi_train_model():
     optimizer2 = torch.optim.Adam(model2.parameters(), lr=lr)
     
 
-    scheduler1 = optim.lr_scheduler.StepLR(optimizer1, step_size=50, gamma=0.1)
-    scheduler2 = optim.lr_scheduler.StepLR(optimizer2, step_size=50, gamma=0.1)
+    scheduler1 = optim.lr_scheduler.ExponentialLR(optimizer1, gamma=0.95)
+    scheduler2 = optim.lr_scheduler.ExponentialLR(optimizer2, gamma=0.95)
 
     train = semi_trainer(train_loader, val_loader, model1, model2, optimizer1, optimizer2, scheduler1 , scheduler2, loss_function1,loss_function2,
                     epochs=num_epoch, best_acc=None, num_class= num_class, trainflow = trainflow, consistency_weight = consistency_weight)

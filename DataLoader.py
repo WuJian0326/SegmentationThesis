@@ -40,6 +40,7 @@ def get_transform():
             #                    p=0.3),
             A.RandomRotate90(),
         ], p=0.3),
+
         A.Normalize(mean=[0.5], std=[0.5], max_pixel_value=255.0),
         ToTensorV2(),
         
@@ -110,7 +111,7 @@ class ImageDataLoader(Dataset):
 
 
         img_path =  self.data_path + 'train/' + self.txt_list[index]
-        mask_path = self.data_path + 'mask/' + self.txt_list[index]
+        mask_path = self.data_path + 'mask128/' + self.txt_list[index]
 
 
 
@@ -120,6 +121,7 @@ class ImageDataLoader(Dataset):
 
 
         mask = np.array(Image.open(mask_path).convert('L'))
+        mask = np.where(mask > 100, 255, 0)
         mask = mask / 255
 
         if self.transform:
@@ -142,6 +144,9 @@ class ImageDataLoader(Dataset):
             
         image = augmentations["image"] 
         mask = augmentations["mask"]
+        # plt.imshow(mask)   
+        # plt.show()
+
         # print('image',image.shape)
         # print('mask',mask.shape)
         return image, mask, img_path

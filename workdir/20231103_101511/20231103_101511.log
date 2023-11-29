@@ -1,0 +1,6 @@
+2023-11-03 10:15:12,964 [semi.py:45] INFO: learning rate : 0.001
+2023-11-03 10:15:12,965 [semi.py:46] INFO: batch size : 16
+2023-11-03 10:15:12,965 [semi.py:47] INFO: num epoch : 300
+2023-11-03 10:15:12,965 [semi.py:48] INFO: trainflow: 5
+2023-11-03 10:15:12,965 [semi.py:62] INFO: ==========Start semi training=========
+2023-11-03 10:16:05,478 [trainer.py:312] INFO: Epoch : 1, Train_loss1 : 0.13891170918941498, Train_loss2 : 0.36717554926872253

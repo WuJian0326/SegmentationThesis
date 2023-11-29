@@ -7,7 +7,7 @@ from pathlib import Path
 # Initializing a queue
 q = Queue(maxsize=3)
 
-def save_checkpoint(model, best_acc, val_acc, epoch, path='./checkpoint/ckpt_'):
+def save_checkpoint(model, best_acc, val_acc, epoch, path='./checkpoint/ckpt_', model_name='model'):
     # Save checkpoint.
     state = {
         'net': model.state_dict(),
@@ -21,13 +21,14 @@ def save_checkpoint(model, best_acc, val_acc, epoch, path='./checkpoint/ckpt_'):
         return val_acc
 
     elif best_acc > val_acc:
-        l.info(f'Saving {path+ str(round(float(val_acc),6))} ckp ')
-        torch.save(state, path + str(round(float(val_acc),6)) + '.pth')
-        q.put(path + str(round(float(val_acc),6)) + '.pth')
-        if q.full():
-            tmp = q.get()
-            os.remove(tmp)
-            l.info(f'Delete {tmp} ckp')
+        l.info(f'Saving {path} {model_name}_{epoch} ckp ')
+        torch.save(state, path + model_name + "_" + str(epoch) + '.pth')
+        print(path + model_name + "_" + str(epoch) + '.pth')
+        # q.put(path + str(round(float(val_acc),6)) + '.pth')
+        # if q.full():
+        #     tmp = q.get()
+        #     os.remove(tmp)
+        #     l.info(f'Delete {tmp} ckp')
         return val_acc
     return best_acc
 

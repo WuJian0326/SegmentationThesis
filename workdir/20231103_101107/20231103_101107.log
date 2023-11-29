@@ -1,0 +1,19 @@
+2023-11-03 10:11:09,275 [semi.py:45] INFO: learning rate : 0.001
+2023-11-03 10:11:09,275 [semi.py:46] INFO: batch size : 16
+2023-11-03 10:11:09,275 [semi.py:47] INFO: num epoch : 300
+2023-11-03 10:11:09,275 [semi.py:48] INFO: trainflow: 1
+2023-11-03 10:11:09,275 [semi.py:62] INFO: ==========Start semi training=========
+2023-11-03 10:12:02,061 [trainer.py:312] INFO: Epoch : 1, Train_loss1 : 0.1258055567741394, Train_loss2 : 0.34888529777526855
+2023-11-03 10:12:03,791 [trainer.py:387] INFO: Model1 Validation: Loss : 0.2215404212474823, mIoU : 0.6008877754211426, mDice : 0.7398664951324463
+2023-11-03 10:12:03,791 [trainer.py:388] INFO: Model2 Validation: Loss : 0.39458122849464417, mIoU : 0.22259913384914398, mDice : 0.34945717453956604
+2023-11-03 10:12:54,190 [trainer.py:312] INFO: Epoch : 2, Train_loss1 : 0.1236373633146286, Train_loss2 : 0.2800586521625519
+2023-11-03 10:12:55,622 [trainer.py:387] INFO: Model1 Validation: Loss : 0.7031112313270569, mIoU : 0.0, mDice : 0.0
+2023-11-03 10:12:55,622 [trainer.py:388] INFO: Model2 Validation: Loss : 0.3532211482524872, mIoU : 0.2758219540119171, mDice : 0.42174434661865234
+2023-11-03 10:13:45,002 [trainer.py:312] INFO: Epoch : 3, Train_loss1 : 0.15772227942943573, Train_loss2 : 0.25157997012138367
+2023-11-03 10:13:46,452 [trainer.py:387] INFO: Model1 Validation: Loss : 0.16404877603054047, mIoU : 0.6239020228385925, mDice : 0.759763777256012
+2023-11-03 10:13:46,452 [trainer.py:388] INFO: Model2 Validation: Loss : 0.33954548835754395, mIoU : 0.27245089411735535, mDice : 0.4112941324710846
+2023-11-03 10:13:46,691 [utils.py:24] INFO: Saving ./checkpoint/ckpt_0.164049 ckp 
+2023-11-03 10:14:36,689 [trainer.py:312] INFO: Epoch : 4, Train_loss1 : 0.1035069152712822, Train_loss2 : 0.21610108017921448
+2023-11-03 10:14:38,300 [trainer.py:387] INFO: Model1 Validation: Loss : 0.1549016535282135, mIoU : 0.6540284752845764, mDice : 0.7819851636886597
+2023-11-03 10:14:38,300 [trainer.py:388] INFO: Model2 Validation: Loss : 0.20711931586265564, mIoU : 0.4804474413394928, mDice : 0.6412627696990967
+2023-11-03 10:14:38,546 [utils.py:24] INFO: Saving ./checkpoint/ckpt_0.154902 ckp 

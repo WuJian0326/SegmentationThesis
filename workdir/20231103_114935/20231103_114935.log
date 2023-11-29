@@ -1,0 +1,23 @@
+2023-11-03 11:49:36,914 [semi.py:45] INFO: learning rate : 0.001
+2023-11-03 11:49:36,914 [semi.py:46] INFO: batch size : 16
+2023-11-03 11:49:36,914 [semi.py:47] INFO: num epoch : 300
+2023-11-03 11:49:36,914 [semi.py:48] INFO: trainflow: 5
+2023-11-03 11:49:36,914 [semi.py:62] INFO: ==========Start semi training=========
+2023-11-03 11:50:28,533 [trainer.py:313] INFO: Epoch : 1, Train_loss1 : 0.13042384386062622, Train_loss2 : 0.34587377309799194
+2023-11-03 11:51:17,595 [trainer.py:313] INFO: Epoch : 2, Train_loss1 : 0.09993255883455276, Train_loss2 : 0.250338613986969
+2023-11-03 11:52:06,290 [trainer.py:313] INFO: Epoch : 3, Train_loss1 : 0.09370328485965729, Train_loss2 : 0.20072150230407715
+2023-11-03 11:52:56,393 [trainer.py:313] INFO: Epoch : 4, Train_loss1 : 0.09672462940216064, Train_loss2 : 0.18348240852355957
+2023-11-03 11:53:47,623 [trainer.py:313] INFO: Epoch : 5, Train_loss1 : 0.09054060280323029, Train_loss2 : 0.17760390043258667
+2023-11-03 11:53:49,487 [trainer.py:388] INFO: Model1 Validation: Loss : 0.11135321855545044, mIoU : 0.6741480231285095, mDice : 0.7980856895446777
+2023-11-03 11:53:49,488 [trainer.py:389] INFO: Model2 Validation: Loss : 0.200066938996315, mIoU : 0.48935508728027344, mDice : 0.644310474395752
+2023-11-03 11:54:40,955 [trainer.py:313] INFO: Epoch : 6, Train_loss1 : 0.09028912335634232, Train_loss2 : 0.18194222450256348
+2023-11-03 11:55:31,312 [trainer.py:313] INFO: Epoch : 7, Train_loss1 : 0.09140345454216003, Train_loss2 : 0.18005481362342834
+2023-11-03 11:56:22,163 [trainer.py:313] INFO: Epoch : 8, Train_loss1 : 0.09079147130250931, Train_loss2 : 0.20602265000343323
+2023-11-03 11:57:12,281 [trainer.py:313] INFO: Epoch : 9, Train_loss1 : 0.09074778854846954, Train_loss2 : 0.18546925485134125
+2023-11-03 11:58:02,264 [trainer.py:313] INFO: Epoch : 10, Train_loss1 : 0.09332988411188126, Train_loss2 : 0.17849645018577576
+2023-11-03 11:58:03,728 [trainer.py:388] INFO: Model1 Validation: Loss : 0.10003579407930374, mIoU : 0.7039595246315002, mDice : 0.8196948766708374
+2023-11-03 11:58:03,728 [trainer.py:389] INFO: Model2 Validation: Loss : 0.1998467743396759, mIoU : 0.49518993496894836, mDice : 0.6514972448348999
+2023-11-03 11:58:03,969 [utils.py:24] INFO: Saving model1 model_9 ckp 
+2023-11-03 11:58:04,483 [utils.py:24] INFO: Saving model2 model_9 ckp 
+2023-11-03 11:58:55,482 [trainer.py:313] INFO: Epoch : 11, Train_loss1 : 0.08890779316425323, Train_loss2 : 0.16807860136032104
+2023-11-03 11:59:46,346 [trainer.py:313] INFO: Epoch : 12, Train_loss1 : 0.08963699638843536, Train_loss2 : 0.16734066605567932

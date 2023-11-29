@@ -1,0 +1,12 @@
+2023-11-03 09:35:35,499 [semi.py:45] INFO: learning rate : 0.001
+2023-11-03 09:35:35,499 [semi.py:46] INFO: batch size : 16
+2023-11-03 09:35:35,499 [semi.py:47] INFO: num epoch : 300
+2023-11-03 09:35:35,499 [semi.py:48] INFO: trainflow: 1
+2023-11-03 09:35:35,499 [semi.py:62] INFO: ==========Start semi training=========
+2023-11-03 09:36:27,114 [trainer.py:308] INFO: Epoch : 1, Train_loss1 : 0.467495322227478, Train_loss2 : 0.467495322227478
+2023-11-03 09:36:28,898 [trainer.py:383] INFO: Model1 Validation: Loss : 0.7017892003059387, mIoU : 0.03392971679568291, mDice : 0.06508322805166245
+2023-11-03 09:36:28,898 [trainer.py:384] INFO: Model2 Validation: Loss : 0.6906188130378723, mIoU : 0.030783159658312798, mDice : 0.0593552365899086
+2023-11-03 09:36:29,489 [utils.py:24] INFO: Saving ./checkpoint/ckpt_0.690619 ckp 
+2023-11-03 09:37:18,429 [trainer.py:308] INFO: Epoch : 2, Train_loss1 : 0.4708244502544403, Train_loss2 : 0.4708244502544403
+2023-11-03 09:37:19,864 [trainer.py:383] INFO: Model1 Validation: Loss : 0.7013879418373108, mIoU : 0.033885203301906586, mDice : 0.06500273197889328
+2023-11-03 09:37:19,864 [trainer.py:384] INFO: Model2 Validation: Loss : 0.6906188130378723, mIoU : 0.030783159658312798, mDice : 0.0593552365899086

@@ -12,7 +12,7 @@ parser.add_argument("-worker","--num_worker",default=4,help="num_worker",type = 
 parser.add_argument("-class","--num_class",default=1,help="num_class",type = int)
 parser.add_argument("-c","--in_channels",default=1,help="in_channels",type = int)
 parser.add_argument("-size","--image_size",default=224,help="image_size",type = int)
-parser.add_argument("-flow","--train_flow",default=1,help="image_size",type = int)
+parser.add_argument("-flow","--train_flow",default=5,help="image_size",type = int)
 parser.add_argument("-data_path","--data_path",default="/home/student/Desktop/SegmentationThesis/data/microglia/",help="data path",type = str)
 parser.add_argument("-train_txt","--train_txt",default="/home/student/Desktop/SegmentationThesis/data/train.txt",help="train_txt",type = str)
 parser.add_argument("-val_txt","--val_txt",default="/home/student/Desktop/SegmentationThesis/data/validation.txt",help="val_txt",type = str)

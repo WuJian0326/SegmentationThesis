@@ -1,0 +1,19 @@
+2023-11-03 15:48:50,752 [semi.py:45] INFO: learning rate : 0.001
+2023-11-03 15:48:50,752 [semi.py:46] INFO: batch size : 16
+2023-11-03 15:48:50,752 [semi.py:47] INFO: num epoch : 300
+2023-11-03 15:48:50,752 [semi.py:48] INFO: trainflow: 5
+2023-11-03 15:48:50,752 [semi.py:62] INFO: ==========Start semi training=========
+2023-11-03 15:48:53,004 [utils.py:37] INFO: ==> load checkpoint from checkpoint/ckpt_model1_49.pth
+2023-11-03 15:48:53,232 [utils.py:37] INFO: ==> load checkpoint from checkpoint/ckpt_model2_114.pth
+2023-11-03 15:50:16,279 [trainer.py:316] INFO: Epoch : 1, Train_loss1 : 0.03530356287956238, Train_loss2 : 0.0489773191511631
+2023-11-03 15:51:34,976 [trainer.py:316] INFO: Epoch : 2, Train_loss1 : 0.03556856885552406, Train_loss2 : 0.048877980560064316
+2023-11-03 15:52:54,640 [trainer.py:316] INFO: Epoch : 3, Train_loss1 : 0.03418967127799988, Train_loss2 : 0.04892552271485329
+2023-11-03 15:54:13,109 [trainer.py:316] INFO: Epoch : 4, Train_loss1 : 0.03428523987531662, Train_loss2 : 0.04960634559392929
+2023-11-03 15:55:32,212 [trainer.py:316] INFO: Epoch : 5, Train_loss1 : 0.0330166332423687, Train_loss2 : 0.04951432719826698
+2023-11-03 15:55:35,145 [trainer.py:391] INFO: Model1 Validation: Loss : 0.0928303450345993, mIoU : 0.7170677781105042, mDice : 0.8282796144485474
+2023-11-03 15:55:35,145 [trainer.py:392] INFO: Model2 Validation: Loss : 0.13926108181476593, mIoU : 0.6130520701408386, mDice : 0.7526499032974243
+2023-11-03 15:56:54,389 [trainer.py:316] INFO: Epoch : 6, Train_loss1 : 0.032744985073804855, Train_loss2 : 0.04832982271909714
+2023-11-03 15:58:13,672 [trainer.py:316] INFO: Epoch : 7, Train_loss1 : 0.03189993277192116, Train_loss2 : 0.049894798547029495
+2023-11-03 15:59:32,354 [trainer.py:316] INFO: Epoch : 8, Train_loss1 : 0.031158164143562317, Train_loss2 : 0.04927103593945503
+2023-11-03 16:00:51,398 [trainer.py:316] INFO: Epoch : 9, Train_loss1 : 0.03171008080244064, Train_loss2 : nan
+2023-11-03 16:02:07,672 [trainer.py:316] INFO: Epoch : 10, Train_loss1 : 0.031351037323474884, Train_loss2 : nan

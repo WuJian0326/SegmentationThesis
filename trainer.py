@@ -9,6 +9,7 @@ from time import time as tm
 import matplotlib.pyplot as plt
 SMOOTH = 1e-6
 from config import args
+import math
 # from memory_profiler import profile
 
 def _to_one_hot(y, num_classes):
@@ -22,7 +23,7 @@ def _to_one_hot(y, num_classes):
 import torch
 
 def compute_miou(pred, label):
-
+    class_IoU = []
     miou = 0
     for i in range(pred.shape[0]):
         pred_inst = pred[i, 0]
@@ -37,6 +38,25 @@ def compute_miou(pred, label):
     miou /= pred.shape[0]
     
     return miou
+
+def compute_miou1(pred, label, num_classes):
+    class_IoU = []
+    miou = 0
+    for c in range(num_classes):
+        pred_inst = (pred == c).float() 
+        label_inst = (label == c).float()
+
+        intersection = torch.logical_and(pred_inst, label_inst)
+        union = torch.logical_or(pred_inst, label_inst)
+
+        iou = torch.sum(intersection) / torch.sum(union)
+        class_IoU.append(iou.item())
+        miou += iou
+
+    miou /= num_classes
+
+    return miou, class_IoU
+
 
 def compute_dice(pred, label):
 
@@ -53,6 +73,22 @@ def compute_dice(pred, label):
     
     return mdice
 
+def compute_dice1(pred, label, num_classes):
+    class_dice = []
+    mdice = 0
+    
+    for c in range(num_classes):
+        pred_inst = (pred == c).float()
+        label_inst = (label == c).float()
+        
+        intersection = torch.logical_and(pred_inst, label_inst)
+        dice = 2 * torch.sum(intersection) / (torch.sum(pred_inst) + torch.sum(label_inst))
+        class_dice.append(dice.item())
+        mdice += dice
+        
+    mdice /= num_classes
+    
+    return mdice, class_dice
 
 class trainer():
     def __init__(self, train_ds, val_ds, model, optimizer, scheduler,
@@ -207,12 +243,14 @@ class semi_trainer():
         self.criterion2 = criterion2
         self.epochs = epochs
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.best_loss = best_acc
+        self.best_loss1 = best_acc
+        self.best_loss2 = best_acc
         self.scaler1 = torch.cuda.amp.GradScaler()
         self.scaler2 = torch.cuda.amp.GradScaler()
         self.num_class = num_class
         self.trainflow = trainflow
         self.consistency_weight = consistency_weight
+        self.iters = 0
 
     def training(self):
         for idx in range(self.epochs):
@@ -230,22 +268,26 @@ class semi_trainer():
         self.model1.train()
         self.model2.train()
         total_loss1 = 0
-        total_IoU1 = 0
-        total_Dice1 = 0
+
 
         total_loss2 = 0
-        total_IoU2 = 0
-        total_Dice2 = 0
+
 
         TrainLoader = tqdm(self.train_ds)
 
 
+
+
         for idx, (img, label, img_path) in enumerate(TrainLoader):
+            max_iter = len(self.train_ds) * self.epochs
 
             volume_batch, label_batch = img.half(), label.unsqueeze(1).float()
-            volume_batch, label_batch = volume_batch.cuda().float(), label_batch.cuda()
-            
+            volume_batch, label_batch = volume_batch.cuda(), label_batch.cuda()
+            # volume_batch.requires_grad = True
+            self.iters += 1
 
+            self.optimizer1.zero_grad(set_to_none=True)
+            self.optimizer2.zero_grad(set_to_none=True)
 
             with torch.cuda.amp.autocast():
                 output1 = self.model1(volume_batch)
@@ -255,12 +297,12 @@ class semi_trainer():
 
                 output1_softmax = torch.softmax(output1, dim=1)
                 output2_softmax = torch.softmax(output2, dim=1)
-                consistency_weight = self.consistency_weight * (epo / self.epochs)
+                consistency_weight = self.consistency_weight * math.exp(-5 * (1 - self.iters / max_iter) ** 2)
 
-                loss1 = 0.5 * (self.criterion1(output1[:args.labeled_bs], label_batch[:args.labeled_bs]) + self.criterion2(
-                    output1_softmax[:args.labeled_bs], label_batch[:args.labeled_bs]))
-                loss2 = 0.5 * (self.criterion1(output2[:args.labeled_bs], label_batch[:args.labeled_bs]) + self.criterion2(
-                    output2_softmax[:args.labeled_bs], label_batch[:args.labeled_bs]))
+                loss1 = 0.3 * (self.criterion1(output1[:args.labeled_bs], label_batch[:args.labeled_bs]) + 0.7 * self.criterion2(
+                    output1[:args.labeled_bs], label_batch[:args.labeled_bs], softmax=False))
+                loss2 = 0.3 * (self.criterion1(output2[:args.labeled_bs], label_batch[:args.labeled_bs]) + 0.7 * self.criterion2(
+                    output2[:args.labeled_bs], label_batch[:args.labeled_bs], softmax=False))
                 
                 pseudo_outputs1 = torch.argmax(
                     output1_softmax[args.labeled_bs:].detach(), dim=1, keepdim=False)
@@ -280,13 +322,17 @@ class semi_trainer():
 
 
 
+
             self.scaler1.scale(model1_loss).backward()
             self.scaler1.step(self.optimizer1)
             self.scaler1.update()
 
+            
+
             self.scaler2.scale(model2_loss).backward()
             self.scaler2.step(self.optimizer2)
             self.scaler2.update()
+
 
 
 
@@ -380,5 +426,5 @@ class semi_trainer():
         l.info(f'Model1 Validation: Loss : {total_loss1}, mIoU : {total_IoU1}, mDice : {total_Dice1}')
         l.info(f'Model2 Validation: Loss : {total_loss2}, mIoU : {total_IoU2}, mDice : {total_Dice2}')
 
-        self.best_loss = save_checkpoint(self.model1, self.best_loss, total_loss1, epo)
-        self.best_loss = save_checkpoint(self.model2, self.best_loss, total_loss2, epo)
+        self.best_loss1 = save_checkpoint(self.model1, self.best_loss1, total_loss1, epo, model_name= "model1")
+        self.best_loss2 = save_checkpoint(self.model2, self.best_loss2, total_loss2, epo, model_name= "model2")

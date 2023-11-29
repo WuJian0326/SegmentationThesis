@@ -13,7 +13,7 @@ from DataLoader import *
 from GANmodel import *
 
 data_path = '/home/student/Desktop/SegmentationThesis/data/microglia/'
-train_txt = '/home/student/Desktop/SegmentationThesis/data/train.txt'
+train_txt = '/home/student/Desktop/SegmentationThesis/data/all.txt'
 train_transform = get_transform()
 # 超參數
 
@@ -30,7 +30,7 @@ image_size = 128
 nc = 1
 
 # Size of z latent vector (i.e. size of generator input)
-nz = 64
+nz = 100
 
 
 
@@ -50,7 +50,7 @@ train_data = ImageDataLoader(
                               )
 train_loader = DL(dataset=train_data, batch_size=batch_size, shuffle=True)
 
-netG = Generator(nz = nz).to(device)
+netG = CustomGenerator(nz = nz).to(device)
 netD = Discriminator().to(device)
 print(netG)
 # netG.apply(weights_init)
@@ -62,7 +62,7 @@ netD.apply(weights_init)
 # 損失函數
 criterion = nn.BCELoss()
 optimizerG = optim.Adam(netG.parameters(), lr=0.0002, betas=(beta1, 0.999))
-optimizerD = optim.Adam(netD.parameters(), lr=0.001, betas=(beta1, 0.999))
+optimizerD = optim.Adam(netD.parameters(), lr=0.0002, betas=(beta1, 0.999))
 real_label = 1.
 fake_label = 0.
 # 訓練
@@ -79,9 +79,9 @@ fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 
 for epoch in range(num_epochs):
     # For each batch in the dataloader
-    for i, (data,_,_) in enumerate(train_loader, 0):
+    for i, (_,data,_) in enumerate(train_loader, 0):
         data = data.float()
-
+        data = data.unsqueeze(1)
         # print(data.shape)
         crop_x = (224 - 128) // 2
         crop_y = (224 - 128) // 2
@@ -95,6 +95,9 @@ for epoch in range(num_epochs):
         rgb_image[:, 0, :, :] = data[:, 0, :, :]
         rgb_image[:, 1, :, :] = data[:, 0, :, :]
         rgb_image[:, 2, :, :] = data[:, 0, :, :]
+        # test = rgb_image[0].detach().cpu()
+        # plt.imshow(test.permute(1,2,0))
+        # plt.show()
         data = rgb_image
         # print(data.shape)
         ############################
@@ -161,7 +164,7 @@ for epoch in range(num_epochs):
         D_losses.append(errD.item())
         
         # Check how the generator is doing by saving G's output on fixed_noise
-        if (iters % 100 == 0) or ((epoch == num_epochs-1) and (i == len(train_loader)-1)):
+        if (iters % 1000 == 0) or ((epoch == num_epochs-1) and (i == len(train_loader)-1)):
             with torch.no_grad():
                 fake = netG(fixed_noise).detach().cpu()
             img_list.append(vutils.make_grid(fake, padding=2, normalize=True))

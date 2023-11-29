@@ -1,0 +1,12 @@
+2023-11-03 13:35:32,977 [semi.py:45] INFO: learning rate : 0.001
+2023-11-03 13:35:32,977 [semi.py:46] INFO: batch size : 16
+2023-11-03 13:35:32,977 [semi.py:47] INFO: num epoch : 300
+2023-11-03 13:35:32,978 [semi.py:48] INFO: trainflow: 5
+2023-11-03 13:35:32,978 [semi.py:62] INFO: ==========Start semi training=========
+2023-11-03 13:35:34,442 [utils.py:37] INFO: ==> load checkpoint from checkpoint/ckpt_model1_49.pth
+2023-11-03 13:35:34,507 [utils.py:37] INFO: ==> load checkpoint from checkpoint/ckpt_model2_39.pth
+2023-11-03 13:36:24,466 [trainer.py:313] INFO: Epoch : 1, Train_loss1 : 0.06795655936002731, Train_loss2 : 0.38588443398475647
+2023-11-03 13:37:13,771 [trainer.py:313] INFO: Epoch : 2, Train_loss1 : 0.06987891346216202, Train_loss2 : 0.36192813515663147
+2023-11-03 13:38:04,776 [trainer.py:313] INFO: Epoch : 3, Train_loss1 : 0.06961159408092499, Train_loss2 : 0.3599930703639984
+2023-11-03 13:38:48,218 [trainer.py:313] INFO: Epoch : 4, Train_loss1 : 0.08223407715559006, Train_loss2 : nan
+2023-11-03 13:39:30,062 [trainer.py:313] INFO: Epoch : 5, Train_loss1 : 0.07259290665388107, Train_loss2 : nan

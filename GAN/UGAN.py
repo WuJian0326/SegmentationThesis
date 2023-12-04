@@ -7,6 +7,10 @@ from torchvision.transforms import transforms
 import torchvision.utils as vutils
 import matplotlib.pyplot as plt
 import sys
+import segmentation_models_pytorch as smp
+import torch.nn.functional as F
+import torch.distributions as dist
+
 sys.path.append('..')
 
 from DataLoader import *
@@ -16,7 +20,7 @@ from model.unet_model import UNet
 data_path = '/home/student/Desktop/SegmentationThesis/data/microglia/'
 train_txt = '/home/student/Desktop/SegmentationThesis/data/train.txt'
 
-train_transform = get_transform()
+train_transform = get_vaild_transform()
 
 LR = 0.001
 BATCH_SIZE = 32
@@ -31,10 +35,50 @@ train_data = ImageDataLoader(
 
 train_loader = DL(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)
 
-netG = UNet(n_channels = 1, n_classes=1).to(device)
-netD = DiscriminatorU(in_channels=1).to(device)
+# netG = UNet(n_channels = 1, n_classes=1).to(device)
+netG = smp.Unet(
+            encoder_name="resnet34",
+            in_channels=1,
+            classes=1
+        )
 
+# for block in netG.encoder.blocks:
+    # block.conv2.dropout = nn.Dropout(p=0.1)
+netG.encoder.conv1.dropout = nn.Dropout(p=0.5)
+for block in netG.encoder.layer1:
+    block.conv1.dropout = nn.Dropout(p=0.5)
+    block.conv2.dropout = nn.Dropout(p=0.5)
+for block in netG.encoder.layer2:
+    block.conv1.dropout = nn.Dropout(p=0.5)
+    block.conv2.dropout = nn.Dropout(p=0.5)
+for block in netG.encoder.layer3:
+    block.conv1.dropout = nn.Dropout(p=0.5)
+    block.conv2.dropout = nn.Dropout(p=0.5)
+for block in netG.encoder.layer4:
+    block.conv1.dropout = nn.Dropout(p=0.5)
+    block.conv2.dropout = nn.Dropout(p=0.5)
+
+# print(netG.encoder)
+# for stage in netG.encoder:
+#     print(stage)
+# for layer in netG.encoder.layers:
+#     # 遍历每个基本块
+#     for block in layer:
+#         # 在每个基本块的第二个卷积后面加上dropout
+#         block.conv2.dropout = nn.Dropout(p=0.5)
+        
+#     # 或者在每个层整体后面加上dropout 
+#     layer.dropout = nn.Dropout(p=0.5)
+
+# 在segmentation head前添加dropout 
+# netG.segmentation_head.dropout = nn.Dropout(p=0.1)
+
+# print(netG)
+netG = netG.to(device)
+
+netD = DiscriminatorU(in_channels=1).to(device)
 criterion = nn.BCELoss()
+
 
 L1loss = nn.L1Loss()
 
@@ -86,6 +130,20 @@ for epoch in range(EPOCHS):
         mask = mask.to(device).float()
         mask = mask.unsqueeze(1)
 
+        probabilities = [0.8, 0.1, 0.1]
+
+        # 生成随机噪声
+        noise_levels = [0.0, 0.1, 0.2]
+        noise_index = torch.multinomial(torch.tensor(probabilities), 1).item()
+        noise_level = noise_levels[noise_index]
+        noise = torch.randn_like(mask) * noise_level
+
+        # 将噪声添加到图像上
+        noisy_mask = mask + noise
+
+        # 可选：将图像限制在 [0, 1] 范围内
+        mask = torch.clamp(noisy_mask, 0, 1)
+
         
         ############################
         # (1) Update D network: maximize log(D(x,y)) + log(1 - D(x,G(x)))
@@ -107,6 +165,7 @@ for epoch in range(EPOCHS):
         # Train with fake
         # mask1 = mask.clone()
         fake_image = netG(mask)
+        fake_image = torch.sigmoid(fake_image)
         # print(fake_image.shape)
         # fake_data = torch.cat((fake_image.detach(), mask), 1)  # Detach to avoid backpropagating through G
         label.fill_(fake_label)
@@ -125,7 +184,9 @@ for epoch in range(EPOCHS):
         label.fill_(real_label)  # fake labels are real for generator cost
         # output = netD(torch.cat((fake_image, mask), 1))
         fake_image = netG(mask)
+        fake_image = torch.sigmoid(fake_image)
         output = netD(fake_image)
+        
         errG_adv = criterion(output, label)
         errG_L1 = L1loss(fake_image, img)
         errG = errG_adv + errG_L1
@@ -163,5 +224,5 @@ plt.show()
 # plt.imshow(np.transpose(vutils.make_grid(mask, padding=2, normalize=True),(1,2,0)))
 # plt.show()
 
-torch.save(netG.state_dict(), 'UnetG.pth')
-torch.save(netD.state_dict(), 'UnetD.pth')
+torch.save(netG.state_dict(), 'resUnetG.pth')
+torch.save(netD.state_dict(), 'resUnetD.pth')

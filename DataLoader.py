@@ -207,3 +207,53 @@ class FakeDataLoader(Dataset):
         # print('mask',mask.shape)
         return image, mask, img_path
 
+
+class Pix2pixloader(Dataset):
+    def __init__(self,  data_path, transform=None):
+
+        self.data_path = data_path
+        
+        self.mask_list = os.listdir(self.data_path + 'augment_mask/')
+        self.transform = transform
+
+    
+    def __len__(self):
+        return len(self.mask_list)
+
+    def __getitem__(self, index):
+
+
+
+
+        mask_path = self.data_path + 'augment_mask/' + self.mask_list[index]
+
+        mask = np.array(Image.open(mask_path).convert('L'))
+        mask = np.where(mask > 100, 255, 0)
+        mask = mask / 255
+
+        if self.transform:
+            augmented = self.transform(image=mask, mask = mask)
+
+        # if np.random.rand() < 0.5:
+        #     image2, mask2, _ = self.__getitem__(np.random.randint(0, len(self.txt_list)))
+        #     # print(image2.shape)
+        #     # image = cv2.resize(image, (64, 64))
+        #     # mask = cv2.resize(mask, (64, 64))
+        #     image = torch.from_numpy(image)
+        #     mask = torch.from_numpy(mask)
+        #     lam = np.random.beta(a=1.0, b=1.0)
+        #     image = image.unsqueeze(0)
+
+        #     image = torch.cat([lam*image, (1-lam)*image2], dim=0)
+        #     mask = torch.cat([lam*mask, (1-lam)*mask2], dim=0)
+
+        #     # print(image.shape)
+            
+        # image = augmentations["image"] 
+        mask = augmented["mask"]
+        # plt.imshow(mask)   
+        # plt.show()
+
+        # print('image',image.shape)
+        # print('mask',mask.shape)
+        return  mask, mask, mask_path
